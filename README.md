@@ -19,3 +19,8 @@
 4. `npm run dev`
 
 백엔드가 실행 중이어야 프론트엔드에서 실시간 상태를 확인할 수 있습니다.
+
+#### GitHub Pages 배포
+- Vite `base`를 `./`로 설정하여 GitHub Pages 하위 경로에서도 정적 파일이 올바르게 로드됩니다.
+- `frontend/.env.production` 등에 `VITE_API_BASE=https://<배포한 백엔드 주소>`를 지정한 뒤 `npm run deploy`로 `dist`를 `gh-pages` 브랜치에 배포할 수 있습니다.
+- 배포 후 주소 예시는 `https://<github-username>.github.io/<repo-name>/` 형태이며, 백엔드 CORS가 허용되어 있어야 합니다.
