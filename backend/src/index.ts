@@ -4,10 +4,14 @@ import statusRouter from "./routes/status";
 import { startScheduler, runFullHealthCheck } from "./cron/scheduler";
 
 const PORT = process.env.PORT || 4000;
+const allowedOrigins = process.env.CORS_ORIGINS
+  ?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 async function bootstrap() {
   const app = express();
-  app.use(cors());
+  app.use(cors(allowedOrigins?.length ? { origin: allowedOrigins } : undefined));
   app.use(express.json());
 
   app.use("/api", statusRouter);

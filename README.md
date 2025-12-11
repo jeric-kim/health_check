@@ -22,5 +22,24 @@
 
 #### GitHub Pages 배포
 - Vite `base`를 `./`로 설정하여 GitHub Pages 하위 경로에서도 정적 파일이 올바르게 로드됩니다.
-- `frontend/.env.production` 등에 `VITE_API_BASE=https://<배포한 백엔드 주소>`를 지정한 뒤 `npm run deploy`로 `dist`를 `gh-pages` 브랜치에 배포할 수 있습니다.
-- 배포 후 주소 예시는 `https://<github-username>.github.io/<repo-name>/` 형태이며, 백엔드 CORS가 허용되어 있어야 합니다.
+- `frontend/.env.production` 파일을 만들고 API 주소를 설정합니다.
+
+  ```bash
+  # frontend/.env.production
+  VITE_API_BASE=https://<배포한 백엔드 주소>
+  ```
+
+- `cd frontend` 후 `npm run deploy`를 실행하면 `dist`가 `gh-pages` 브랜치에 배포됩니다.
+- GitHub Pages 주소 예시는 `https://<github-username>.github.io/<repo-name>/` 형태이며, **백엔드가 CORS를 허용**하고 있어야 합니다.
+
+#### 백엔드 CORS 설정
+- 기본값: 모든 Origin 허용 (`app.use(cors())` 동작과 동일)
+- 특정 도메인만 허용하려면 서버 실행 환경에 `CORS_ORIGINS`를 `,`로 구분하여 지정합니다.
+
+  ```bash
+  # 예시: 로컬 개발 + GitHub Pages 호스트만 허용
+  CORS_ORIGINS=http://localhost:5173,https://<github-username>.github.io/<repo-name>/
+  npm run dev
+  ```
+
+- 여러 도메인을 입력하면 배열로 처리되어 해당 Origin 요청만 허용됩니다.
