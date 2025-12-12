@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  fetchLogs,
-  fetchMeta,
-  fetchStatuses,
-  triggerCheck,
-} from "./api/client";
+import { API_BASE, fetchLogs, fetchStatuses, triggerCheck } from "./api/client";
 import ServiceCard from "./components/ServiceCard";
 import StatusBadge from "./components/StatusBadge";
 import StatusChart from "./components/StatusChart";
@@ -15,13 +10,22 @@ function App() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [logs, setLogs] = useState<HealthLog[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
-      const [statusData] = await Promise.all([fetchStatuses(), fetchMeta()]);
-      setStatuses(statusData);
-      if (statusData.length > 0) {
-        setSelectedId(statusData[0].id);
+      try {
+        const statusData = await fetchStatuses();
+        setStatuses(statusData);
+        if (statusData.length > 0) {
+          setSelectedId(statusData[0].id);
+        }
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError(
+          "API 호출에 실패했습니다. VITE_API_BASE 또는 ?apiBase=... 쿼리를 올바른 백엔드 주소로 설정했는지 확인하세요."
+        );
       }
     };
     init();
@@ -29,7 +33,17 @@ function App() {
 
   useEffect(() => {
     if (!selectedId) return;
-    fetchLogs(selectedId).then(setLogs);
+    fetchLogs(selectedId)
+      .then((data) => {
+        setLogs(data);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(
+          "로그를 불러오지 못했습니다. 배포된 백엔드 주소(API_BASE)를 확인해주세요."
+        );
+      });
   }, [selectedId]);
 
   const selectedService = useMemo(
@@ -53,6 +67,7 @@ function App() {
       await refreshAll();
       const newLogs = await fetchLogs(selectedService.id);
       setLogs(newLogs);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -64,6 +79,11 @@ function App() {
         <h1 className="text-2xl font-bold">한국 인기 서비스 상태 모니터</h1>
         <p className="text-slate-400 mt-1 text-sm">
           넷플릭스, 유튜브, 구글 검색, ChatGPT, Canva의 상태를 비공식으로 모니터링합니다.
+        </p>
+        <p className="text-xs text-slate-500 mt-2">
+          API 주소: <span className="text-emerald-300">{API_BASE}</span> (GitHub Pages에서는
+          <code className="mx-1 bg-slate-800 px-1 rounded">?apiBase=&lt;배포 백엔드&gt;</code> 쿼리나
+          <code className="mx-1 bg-slate-800 px-1 rounded">frontend/.env.production</code>으로 지정하세요.)
         </p>
       </header>
       <main className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -121,6 +141,11 @@ function App() {
                 {loading ? "확인 중..." : "지금 상태 다시 확인"}
               </button>
               <StatusChart logs={logs} />
+              {error && (
+                <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-md p-3">
+                  {error}
+                </p>
+              )}
               <p className="text-xs text-slate-500">
                 본 페이지의 데이터는 비공식 모니터링 결과이며 참고용으로만 사용해 주세요.
               </p>

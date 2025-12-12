@@ -1,8 +1,35 @@
 import axios from "axios";
 import { AggregatedServiceStatus, HealthLog } from "../types/ServiceStatus";
 
+function resolveApiBase() {
+  const envBase = import.meta.env.VITE_API_BASE;
+
+  if (typeof window === "undefined") {
+    return envBase || "http://localhost:4000";
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const overrideFromQuery = params.get("apiBase")?.trim();
+
+  if (overrideFromQuery) {
+    localStorage.setItem("apiBaseOverride", overrideFromQuery);
+  }
+
+  const stored = localStorage.getItem("apiBaseOverride")?.trim();
+
+  return (
+    overrideFromQuery ||
+    stored ||
+    envBase ||
+    window.location.origin.replace(/\/$/, "") ||
+    "http://localhost:4000"
+  );
+}
+
+export const API_BASE = resolveApiBase();
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || "http://localhost:4000",
+  baseURL: API_BASE,
 });
 
 export async function fetchStatuses(): Promise<AggregatedServiceStatus[]> {

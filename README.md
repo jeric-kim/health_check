@@ -31,6 +31,7 @@
 
 - `cd frontend` 후 `npm run deploy`를 실행하면 `dist`가 `gh-pages` 브랜치에 배포됩니다.
 - GitHub Pages 주소 예시는 `https://<github-username>.github.io/<repo-name>/` 형태이며, **백엔드가 CORS를 허용**하고 있어야 합니다.
+- GitHub Pages에서 API 주소를 즉시 바꾸고 싶다면 `https://<github-username>.github.io/<repo-name>/?apiBase=https://<배포한 백엔드 주소>`처럼 `apiBase` 쿼리를 붙여 접속하면 브라우저 `localStorage`에 저장되어 다음 방문에도 유지됩니다.
 
 #### 백엔드 CORS 설정
 - 기본값: 모든 Origin 허용 (`app.use(cors())` 동작과 동일)
